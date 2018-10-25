@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ApiTest</string>
-    <string name="nullLine">{"success":0,"message":"Project is empty"}</string>
+    <string name="get_info">Получить информацию</string>
+    <string name="inputPid">Введите PID</string>
 </resources>

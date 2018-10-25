@@ -29,16 +29,16 @@ public class List extends AppCompatActivity {
     private static final String TAG_FRIDAY_SCHEDULE = "friday_schedule";
     private static final String TAG_SATURDAY_SCHEDULE = "saturday_schedule";
     private static final String TAG_SUNDAY_SCHEDULE = "sunday_schedule";
-    private String answer="";
-
+    StringBuilder stringBuilder = new StringBuilder();
     JSONArray workers = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
         TextView output = findViewById(R.id.Output);
-        String json = getIntent().getExtras().get("json").toString();
-        try { jObj = new JSONObject(json);}
+        try {
+            String json = getIntent().getExtras().get("json").toString();
+            jObj = new JSONObject(json);}
         catch (Exception e) {
             output.setText(e.toString());
         }
@@ -46,7 +46,6 @@ public class List extends AppCompatActivity {
             workers = jObj.getJSONArray(TAG_WORKERS);
             for(int i = 0; i < workers.length(); i++){
                 JSONObject c = workers.getJSONObject(i);
-                // Storing each json item in variable
                 String flawed = c.getString(TAG_FLAWED);
                 String missed_count = c.getString(TAG_MISSED_COUNT);
                 String came_on_time_count = c.getString(TAG_CAME_ON_TIME_COUNT);
@@ -77,9 +76,10 @@ public class List extends AppCompatActivity {
                         "\n                Среда: "+wednesday_schedule+"\n                Четверг: "+thursday_schedule+
                         "\n                Пятница: "+friday_schedule+"\n                Суббота: "+saturday_schedule+
                         "\n                Восскрсенье: "+sunday_schedule;
-                answer += current_worker+"\n";
+                stringBuilder.append(current_worker).append("\n");
             }
             output.setMovementMethod(new ScrollingMovementMethod());
+            String answer = stringBuilder.toString();
             output.setText(answer);
         } catch (Exception e) {
             output.setText(e.toString());

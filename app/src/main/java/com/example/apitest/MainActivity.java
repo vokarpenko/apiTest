@@ -13,11 +13,12 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     public String pid;
-    char dm = (char)34;
+    public MyTask myTask;
+    static char dm = (char)34;
     EditText editText;
-    public String path;
+    static String path;
     String NullString = "{"+dm+"success"+dm+":0,"+dm+"message"+dm+":"+dm+"Project is empty"+dm+"}";
-    String line = "";
+    static String line = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,53 +29,55 @@ public class MainActivity extends AppCompatActivity {
     public void OnClick(View view) {
         pid = editText.getText().toString();
         if (editText.getText().toString().equals("")) {
-            Toast toast = Toast.makeText(getApplicationContext(),"Введите pid", Toast.LENGTH_LONG);
-            toast.show();
+            showToast("Введите pid");
         }
         else {
             path = "http://mytj.ru/api/get_all_workers_in_project.php?pid="+pid+"&list=all";
-            MyTask myTask = new MyTask();
+            myTask = new MyTask();
             myTask.execute();
-
+            try {
+                line = myTask.get();
+                if (!NullString.equals(line)) {
+                    Intent intent = new Intent(MainActivity.this, List.class);
+                    intent.putExtra("json", line);
+                    myTask.cancel(true);
+                    startActivity(intent);
+                }
+                else {showToast("Такого pid нет в базе");}
+            }
+            catch (Exception e){showToast(e.toString());}
         }
     }
 
-    public class MyTask extends AsyncTask<Void, Void, Void> {
+    static public class MyTask extends AsyncTask<Void, Void, String> {
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
+            if (isCancelled()) return null;
             try {
+                line="";
                 URL url = new URL(path);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream(), "UTF-8"));
                 String temp;
                 while (true) {
                     temp = reader.readLine();
-                    line += temp;
-                    if (temp == null)
-                        break;
+                    if (temp != null)
+                        line += temp;
+                    else
+                        return line;
                 }
-            }
-            catch (Exception e) { }
-            return null;
+            } catch (Exception e) {}
+            return line;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
+        protected void onCancelled() {
+            super.onCancelled();
+        }
+    }
 
-            if (line !=NullString){
-            Intent intent = new Intent(MainActivity.this, List.class);
-            intent.putExtra("json",line);
-            startActivity(intent);
-        }
-        else {Toast toast = Toast.makeText(getApplicationContext(),"Такого pid нет в базе", Toast.LENGTH_LONG);
-            toast.show();
-            }
-        }
+    public void showToast(String message){
+        Toast toast = Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG);
+        toast.show();
     }
 }
 
